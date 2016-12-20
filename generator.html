@@ -1,0 +1,188 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Fantasy Generator</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" type="text/css" href="css/cerulean.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-slider.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script type="text/javascript" src="js/angular-animate.min.js"></script>
+</head>
+
+<body>
+    <div ng-app="generator" ng-cloak class="container">
+
+        <h2>Fantasy Generator</h2>
+
+        <div ng-controller="markovChainCtrl">
+
+            <div ng-show="error">
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+            </div>
+
+            <div ng-show="generatorReady">
+
+                <div class="form-group">
+                    <textarea class="form-control lg-textarea" ng-model="dictionary" ng-change="onChangeDictionary()"></textarea>
+                </div>
+
+                <!-- Settings button -->
+                <div class="form-group">
+                    <button class="btn btn-default" slide-toggle="#settingsMarkov" ng-click="onClickSettings()">
+                        <span ng-show="!hasSettingsDisplayed">Show</span>
+                        <span ng-show="hasSettingsDisplayed">Hide</span> Settings
+                    </button>
+                </div>
+
+                <!-- Settings panel -->
+                <div id="settingsMarkov" class="slideable">
+                    <form class="well">
+                        <div class="row">
+
+                            <div class="form-group col-sm-8">
+                                <label for="lengthSlider">Length</label>
+                                <slider id="lengthSlider" ng-model="sliderLength.value" min="sliderLength.min" step="sliderLength.step" max="sliderLength.max" value="sliderLength.value" range=true tooltip=always on-start-slide="onSlideLength($event)" on-slide="onSlideLength($event)">
+                                </slider>
+                            </div>
+
+                            <div class="form-group col-sm-4">
+                                <label for="contains">Order</label>
+                                <slider id="orderSlider" ng-model="sliderOrder.value" min="sliderOrder.min" step="sliderOrder.step" max="sliderOrder.max" value="sliderOrder.value" tooltip=always on-start-slide="onSlideOrder($event)" on-slide="onSlideOrder($event)">
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-sm-3">
+                                <label for="starWith">Start With</label>
+                                <input type="text" class="form-control" id="starWith" ng-model="startWith" ng-change="generateMarkovChains()">
+                            </div>
+                            <div class="form-group col-sm-3">
+                                <label for="contains">Contains</label>
+                                <input type="text" class="form-control" id="contains" ng-model="contains" ng-change="generateMarkovChains()">
+                            </div>
+                            <div class="form-group col-sm-3">
+                                <label for="doesntContains">Does not contains</label>
+                                <input type="text" class="form-control" id="doesntContains" ng-model="doesntContains" ng-change="generateMarkovChains()">
+                            </div>
+                            <div class="form-group col-sm-3">
+                                <label for="endWith">End With</label>
+                                <input type="text" class="form-control" id="endWith" ng-model="endWith" ng-change="generateMarkovChains()">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-8">
+                        <h4>Results</h4>
+                    </div>
+                    <div class="col-xs-4 text-right">
+
+                        <span>
+                        <total-selector
+                            selected-value="totalNames"
+                            values="[10, 30, 60, 100, 250, 500]"
+                            select-total-items="onSelectTotalItems(total)">
+                        </total-selector>
+                    </span>
+
+                        <button class="btn btn-default btn-sm" ng-click="generateMarkovChains()">Refresh</button>
+                    </div>
+                </div>
+
+                <p ng-show="names.length === 0" class="text-warning">No results found. Please change the settings</p>
+
+                <!-- LG -->
+                <table class="table hidden-xs hidden-sm hidden-md">
+                    <tbody>
+                        <tr ng-repeat="name in names track by $index" ng-switch on="$index % 5">
+                            <td ng-switch-when="0" width=20%>
+                                {{ names[$index] }}
+                            </td>
+                            <td ng-switch-when="0" width=20%>
+                                {{ names[$index + 1] }}
+                            </td>
+                            <td ng-switch-when="0" width=20%>
+                                {{ names[$index + 2] }}
+                            </td>
+                            <td ng-switch-when="0" width=20%>
+                                {{ names[$index + 3] }}
+                            </td>
+                            <td ng-switch-when="0" width=20%>
+                                {{ names[$index + 4] }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- MD -->
+                <table class="table hidden-xs hidden-sm hidden-lg">
+                    <tbody>
+                        <tr ng-repeat="name in names track by $index" ng-switch on="$index % 4">
+                            <td ng-switch-when="0" width=25%>
+                                {{ names[$index] }}
+                            </td>
+                            <td ng-switch-when="0" width=25%>
+                                {{ names[$index + 1] }}
+                            </td>
+                            <td ng-switch-when="0" width=25%>
+                                {{ names[$index + 2] }}
+                            </td>
+                            <td ng-switch-when="0" width=25%>
+                                {{ names[$index + 3] }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- SM -->
+                <table class="table hidden-xs hidden-md hidden-lg">
+                    <tbody>
+                        <tr ng-repeat="name in names track by $index" ng-switch on="$index % 3">
+                            <td ng-switch-when="0" width=33.33%>
+                                {{ names[$index] }}
+                            </td>
+                            <td ng-switch-when="0" width=33.33%>
+                                {{ names[$index + 1] }}
+                            </td>
+                            <td ng-switch-when="0" width=33.33%>
+                                {{ names[$index + 2] }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- XS -->
+                <table class="table hidden-sm hidden-md hidden-lg">
+                    <tbody>
+                        <tr ng-repeat="name in names track by $index" ng-switch on="$index % 2">
+                            <td ng-switch-when="0" width=50%>
+                                {{ names[$index] }}
+                            </td>
+                            <td ng-switch-when="0" width=50%>
+                                {{ names[$index + 1] }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/ui-bootstrap-custom-tpls-2.3.1.min.js"></script>
+    <script src="js/bootstrap-slider.min.js"></script>
+    <script src="js/slider.js"></script>
+    <script src="js/generator.js"></script>
+</body>
+
+</html>
